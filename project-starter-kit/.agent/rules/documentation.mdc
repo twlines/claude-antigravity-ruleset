@@ -1,0 +1,88 @@
+---
+description: Enforce documentation standards — DESIGN INTENT, JSDoc, section separators — when creating or modifying source files.
+globs: "**/*.{ts,tsx}"
+---
+# Documentation Rules
+
+## Module-Level Doc Comment (Every File)
+Every source file starts with a doc comment containing:
+1. **Name + purpose** — one line
+2. **DESIGN INTENT** — why this module exists, what complexity it hides (2-3 sentences)
+3. **`@see` links** — to relevant plan, design doc, or standard
+
+```typescript
+/**
+ * PricingService — Calculates dynamic pricing for treatment plans.
+ *
+ * DESIGN INTENT: Hides the complexity of insurance tier lookup, discount
+ * stacking, and tax calculation behind a single `calculate()` method.
+ * Callers never need to know about fee schedule versions.
+ *
+ * @see docs/design/pricing-plan.md
+ * @see docs/standards/decomposition-standard.md
+ */
+```
+
+## Section Separators
+Use consistent separators to organize file anatomy:
+```typescript
+// ─── External Imports ──────────────────────────────
+// ─── Internal Imports ──────────────────────────────
+// ─── Constants ─────────────────────────────────────
+// ─── Types ─────────────────────────────────────────
+// ─── Implementation ────────────────────────────────
+```
+
+## JSDoc on Exported Functions
+Every exported function has `@param`, `@returns`, and `@throws`:
+```typescript
+/**
+ * Calculate pricing for a treatment plan.
+ *
+ * @param plan - The treatment plan to price (must have at least one procedure)
+ * @param options - Pricing overrides (insurance tier, discount codes)
+ * @returns Breakdown with `{ total, insurancePortion, patientPortion }`
+ * @throws {ValidationError} If plan has zero procedures
+ */
+export async function calculatePricing(
+  plan: TreatmentPlan,
+  options?: PricingOptions
+): Promise<PricingBreakdown> { ... }
+```
+
+## JSDoc on Interface Props
+Document all props, especially for hooks and component interfaces:
+```typescript
+interface UseRecordingOptions {
+  /** Maximum recording duration in seconds (default: 3600) */
+  maxDuration?: number;
+  /** Called when recording exceeds maxDuration */
+  onTimeout?: () => void;
+  /** Practice ID for data isolation (required) */
+  practiceId: string;
+}
+```
+
+## Domain Documentation
+> [CUSTOMIZE] Adjust thresholds to your project.
+- **README per domain directory** when a domain has 3+ files
+- **Design doc per major feature** linked from the code via `@see`
+
+## Comment Quality
+- ✅ Explain **why** a non-obvious decision was made
+- ✅ Document **contracts** — invariants, pre/post conditions
+- ✅ Warn about **gotchas** or performance implications
+- ❌ Don't restate what the code does
+- ❌ Don't summarize the function name
+- ❌ Don't write "self-explanatory" docs like `/** The name */`
+
+## Exceptions (No Doc Required)
+- `types.ts` — type names are self-documenting
+- `index.ts` — barrel exports only
+- Test files — test names are the documentation
+
+## Anti-Patterns
+- ❌ `/** Gets the user */` on a function called `getUser`
+- ❌ Missing DESIGN INTENT on service/repository files
+- ❌ `@see` links that point to nonexistent files
+- ❌ Undocumented interface props on public hooks

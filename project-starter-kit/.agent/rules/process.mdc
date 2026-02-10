@@ -1,0 +1,68 @@
+---
+description: Enforce plan-first workflow, TDD, verification loop, and quality gates before merging or reporting done.
+globs: "**/*"
+---
+# Process Rules
+
+## 1. Plan First (Tasks Spanning 3+ Files)
+Run `/deep-research` before writing an implementation plan. The first plan is always a draft.
+
+## 2. TDD Mandate
+1. Write test file **before** production file.
+2. Tests import directly from the module — never through facades.
+3. Red → Green → Refactor.
+
+## 3. Verification Loop (After EVERY Change)
+Run `/verify`. The full protocol:
+```
+Compile  → pass?  FAIL → fix → restart
+Test     → pass?  FAIL → fix → restart
+Audit    → clean? FAIL → fix → restart
+Cross-ref → complete? GAP → fix → restart
+Regression → pass? FAIL → fix → restart
+ALL clean → EXIT (actually done)
+```
+> [CUSTOMIZE] Replace compile/test commands in `.agent/workflows/verify.md`.
+
+Max 5 passes. "I wrote the file" is NOT done.
+
+## 4. Boy Scout Rule
+Every file you touch: zero lint/type errors after — **including pre-existing ones.**
+
+## 5. API Integration Chain
+Before integrating any API call, trace the complete path:
+```
+Client → API Endpoint → Route Handler → Middleware → Storage/Response
+```
+Don't assume any link works. Verify each one.
+
+## 6. Quality Gates (Before Merge)
+- [ ] All tests pass
+- [ ] Zero lint/type errors in touched files
+- [ ] No new `any` types
+- [ ] File size within limits
+- [ ] Doc comment with DESIGN INTENT
+- [ ] Test file exists for every source file
+- [ ] Verification loop exited clean
+
+## 7. Subagent Delegation
+When delegating to subagents:
+1. **One goal** per subagent with defined inputs/outputs.
+2. **Inject context** — subagents don't inherit your conversation.
+3. **Set constraints** — what they cannot do.
+4. **Verify output** — audit subagent work against these same rules.
+
+## 8. Queue-Driven Execution
+For large-scale work (3+ files in a batch):
+1. Create a queue file with status per item (`PENDING` / `DONE` / `BLOCKED`)
+2. Process one item per cycle through the full verify loop
+3. Update the queue after each item
+4. Persist across sessions — any conversation can resume
+
+## Anti-Patterns (NEVER)
+- ❌ Skipping TDD for "simple" code
+- ❌ Labeling failures "pre-existing" without investigating
+- ❌ Presenting a forward-trace as a finished plan
+- ❌ Exiting verification loop after a fix without restarting
+- ❌ Assuming imports resolve without checking exports
+- ❌ Only tracing the active code path

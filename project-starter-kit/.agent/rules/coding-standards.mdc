@@ -1,0 +1,79 @@
+---
+description: Enforce code style, naming, error handling, and async patterns when writing or reviewing TypeScript.
+globs: "**/*.{ts,tsx}"
+---
+# Coding Standards
+
+## File Anatomy (Golden Snippet — Match This Pattern)
+```typescript
+/**
+ * ModuleName — One-line purpose
+ *
+ * DESIGN INTENT: Why this module exists and what complexity it hides.
+ *
+ * @see docs/design/{relevant-plan}.md
+ */
+
+// ─── External Imports ──────────────────────────────
+import { logger } from "@/utils/logger";
+
+// ─── Internal Imports ──────────────────────────────
+import type { DomainType } from "./types";
+
+// ─── Constants ─────────────────────────────────────
+const MAX_RETRIES = 3;
+
+// ─── Implementation ────────────────────────────────
+export class ServiceName {
+  /** @throws {AppError} When validation fails */
+  static async doAction(input: Input): Promise<Result> {
+    if (!input.isValid) return Result.empty();         // Guard
+    try { return await execute(input); }                // Logic
+    catch (err) {                                       // Error
+      logger.error("Action failed", { error: err });
+      return Result.failure(err);
+    }
+  }
+}
+```
+
+## Style Rules
+- **Guard clauses first.** Edge cases at top. Happy path flows down, no nesting.
+- **Max 4 parameters.** Beyond 4 → use an options object.
+- **Rich return types.** Return `{ total, created, skipped }` not `number`.
+- **`const` by default.** `let` only for accumulation. Never `var`.
+- **String literal unions** over enums. Zero runtime cost.
+- **Exhaustive switch.** `never` check in default case.
+
+## Error Handling
+- **Degrade gracefully.** Return valid degraded states over throwing.
+- **Log-and-continue.** Auxiliary ops (notifications, analytics) never crash the main flow.
+- **Coalesce errors.** Typed result outcomes > thrown exceptions.
+
+## Async Patterns
+- `Promise.all` for independent work. `await` for dependent work.
+- **Bounded concurrency.** Never `Promise.all` on unbounded arrays. Chunk or use `p-limit`.
+
+## Casing
+> [CUSTOMIZE] Define your project's boundary casing.
+- `snake_case` at storage/API boundaries
+- `camelCase` in-process TypeScript
+- Schemas preprocess inputs to canonical shape
+
+## Absolute Rules
+- **No `any`.** Use `unknown` + validation (Zod).
+- **No side effects on import.** Defer to `init()` or usage time.
+- **No commented-out code.** Delete it. Git remembers.
+- **Prefer duplication over hasty abstraction.** Rule of 3 before extracting.
+
+## Comments
+- ✅ Explain **why** a non-obvious decision was made
+- ✅ Document **contracts** (invariants, pre/post conditions)
+- ✅ Warn about **gotchas** or perf implications
+- ❌ Don't restate what the code does
+- ❌ Don't summarize the function name
+
+## Anti-Patterns
+- ❌ Defining types inside components (use `types.ts`)
+- ❌ Hasty abstractions (can't explain it in one sentence? don't build it)
+- ❌ Using `null` where `undefined` suffices

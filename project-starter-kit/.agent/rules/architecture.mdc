@@ -1,0 +1,71 @@
+---
+description: Enforce directory structure, file size limits, and deep module design when creating or modifying source files.
+globs: "**/*.{ts,tsx}"
+---
+# Architecture Rules
+
+## Read Before Write
+`view_file` the directory contents and adjacent files **before** creating a new file.
+- Verify exports exist before importing them.
+- Check if the file or a similar one already exists.
+
+## Directory-Per-Domain
+> [CUSTOMIZE] Adjust pattern to your project.
+```
+services/{domain}/
+├── index.ts               ← Barrel exports (public API)
+├── {Service}Repository.ts ← Data access
+├── {Service}Service.ts    ← Business logic
+├── types.ts               ← Domain types
+└── __tests__/             ← Colocated tests
+```
+
+## Size Budgets (Hard Limits)
+> [CUSTOMIZE] Adjust limits to your project.
+
+| Category | Max Lines | Max Public Methods | Action on Limit |
+|----------|-----------|-------------------|-----------------|
+| Repository | 800 | 15 | Split by entity |
+| Service | 500 | 8 | Split by capability |
+| Facade | 400 | 5 | Group related methods |
+| Utility | 200 | — | Extract helpers |
+| Types | 150 | — | Split to sub-files |
+
+Hit the limit → decompose immediately.
+
+## Deep Modules
+Every public method hides ≥3× its interface complexity.
+```typescript
+// ✅ Deep: simple call, hides retry + upload + processing
+const result = await service.upload(file, metadata);
+
+// ❌ Shallow: 3 calls that must happen in order
+const url = await service.getSignedUrl(meta);
+await service.uploadWithRetry(url, file);
+await service.triggerProcessing(id);
+```
+
+## Extraction Order
+1. **Types** → `types.ts`
+2. **Repository** → data access (no deps on new services)
+3. **Pure services** → independent business logic
+4. **Dependent services** → services calling other new services
+5. **Facade** → wiring layer
+6. **Legacy facade** → backward-compatible re-exports (1 release)
+
+## Naming
+> [CUSTOMIZE] Adjust naming conventions to your project.
+
+| Type | Pattern | Example |
+|------|---------|---------|
+| Repository | `{Domain}Repository` | `OrderRepository` |
+| Service | `{Domain}Service` | `PricingService` |
+| Orchestrator | `{Domain}Workflows` | `CheckoutWorkflows` |
+| Notifier | `{Domain}Notifier` | `OrderNotifier` |
+| Value Object | `{Domain}Result` | `AuthSession` |
+
+## Anti-Patterns
+- ❌ Shallow modules that just pass-through data
+- ❌ Circular dependencies
+- ❌ Global mutable state
+- ❌ Temporal decomposition (forcing caller to know order)
