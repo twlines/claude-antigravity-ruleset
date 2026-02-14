@@ -38,7 +38,9 @@ project-starter-kit/
         ├── verify.md                  ← /verify command (after every file change)
         ├── deep-research.md           ← /deep-research command (before implementation plans)
         ├── pre-push.md                ← /pre-push command (before every git push)
-        └── diff-review.md             ← /diff-review command (before committing)
+        ├── diff-review.md             ← /diff-review command (before committing)
+        ├── boy-scout.md               ← /boy-scout command (craftsmanship pass after /verify)
+        └── miss-sweep.md              ← /miss-sweep command (catches plan gaps before execution)
 ```
 
 ## Usage

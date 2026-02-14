@@ -55,6 +55,8 @@ This project follows the Build-It-Right engineering standards. See:
 - **`/deep-research`** — Run before any implementation plan for 3+ file tasks
 - **`/pre-push`** — Full QA gate before every `git push` (diff review + all CI gates)
 - **`/diff-review`** — Quick architectural scan before committing
+- **`/boy-scout`** — Craftsmanship pass after `/verify` — cleanup opportunities
+- **`/miss-sweep`** — Post-plan interrogation — catches gaps before execution
 
 ## Domain Context
 
