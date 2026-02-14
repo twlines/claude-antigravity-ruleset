@@ -53,6 +53,8 @@ This project follows the Build-It-Right engineering standards. See:
 
 - **`/verify`** — Run after EVERY file change, before reporting done
 - **`/deep-research`** — Run before any implementation plan for 3+ file tasks
+- **`/pre-push`** — Full QA gate before every `git push` (diff review + all CI gates)
+- **`/diff-review`** — Quick architectural scan before committing
 
 ## Domain Context
 
