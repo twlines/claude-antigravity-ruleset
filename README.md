@@ -35,8 +35,10 @@ project-starter-kit/
     │   ├── documentation.mdc          ← DESIGN INTENT, JSDoc
     │   └── process.mdc               ← TDD, verification loop
     └── workflows/
-        ├── verify.md                  ← /verify command
-        └── deep-research.md           ← /deep-research command
+        ├── verify.md                  ← /verify command (after every file change)
+        ├── deep-research.md           ← /deep-research command (before implementation plans)
+        ├── pre-push.md                ← /pre-push command (before every git push)
+        └── diff-review.md             ← /diff-review command (before committing)
 ```
 
 ## Usage
